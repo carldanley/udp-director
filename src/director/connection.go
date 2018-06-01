@@ -3,6 +3,7 @@ package director
 import (
 	"fmt"
 	"net"
+	"strings"
 	"time"
 )
 
@@ -59,7 +60,13 @@ func (c *Connection) ListenForEgress(client *net.UDPConn) {
 		buffer := make([]byte, 1024)
 
 		bytesSent, _, err := client.ReadFromUDP(buffer)
-		if err != nil && c.relayers != nil {
+		if err != nil {
+			if c.relayers != nil {
+				continue
+			} else if strings.Contains(err.Error(), "recvfrom: connection refused") {
+				continue
+			}
+
 			fmt.Println(err.Error())
 			continue
 		}
